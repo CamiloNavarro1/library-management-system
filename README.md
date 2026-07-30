@@ -1,6 +1,8 @@
 # Sistema de Gestión de Biblioteca
 
-Este proyecto implementa un sistema de gestión de biblioteca con una arquitectura Full Stack moderna. El objetivo es demostrar buenas prácticas en el desarrollo de aplicaciones web utilizando Spring Boot, React, PostgreSQL y Docker, aplicando principios de modularidad, reutilización de componentes y separación de responsabilidades.
+Este proyecto implementa un sistema de gestión de biblioteca desarrollado con una arquitectura Full Stack basada en Spring Boot, React, PostgreSQL y Docker.
+
+La aplicación permite administrar usuarios, libros, ejemplares y préstamos mediante una API REST y una interfaz web moderna, aplicando buenas prácticas de desarrollo, separación de responsabilidades y modularidad.
 
 ---
 
@@ -9,10 +11,10 @@ Este proyecto implementa un sistema de gestión de biblioteca con una arquitectu
 ## Backend
 
 - Java 17
-- Spring Boot 3
+- Spring Boot 3.5.4
 - Spring Data JPA
 - Maven
-- PostgreSQL
+- PostgreSQL 16
 - Swagger / OpenAPI
 
 ## Frontend
@@ -52,26 +54,29 @@ Este proyecto implementa un sistema de gestión de biblioteca con una arquitectu
 # Estructura del proyecto
 
 ```
-prueba-tecnica/
+library-management-system/
 │
 ├── README.md
 ├── docker-compose.yml
+├── .gitignore
 │
 ├── library-backend/
-│   ├── library-backend/
-│   │   ├── src/
-│   │   ├── Dockerfile
-│   │   ├── pom.xml
-│   │   └── ...
-│
-├── library-frontend/
+│   ├── database/
+│   │   └── library_db.dump
 │   ├── src/
 │   ├── Dockerfile
-│   ├── nginx.conf
-│   ├── package.json
-│   └── ...
+│   ├── pom.xml
+│   ├── .gitignore
+│   └── .dockerignore
 │
-└── docs/
+└── library-frontend/
+    ├── public/
+    ├── src/
+    ├── Dockerfile
+    ├── nginx.conf
+    ├── package.json
+    ├── package-lock.json
+    └── ...
 ```
 
 ---
@@ -84,12 +89,13 @@ prueba-tecnica/
 - Total de usuarios registrados.
 - Total de libros registrados.
 - Total de préstamos.
-- Préstamos activos.
+- Total de préstamos activos.
 - Historial de préstamos recientes.
 
 ## Gestión de Usuarios
 
 - Crear usuarios.
+- Consultar usuarios.
 - Editar usuarios.
 - Eliminar usuarios.
 - Buscar usuarios.
@@ -98,6 +104,7 @@ prueba-tecnica/
 ## Gestión de Libros
 
 - Crear libros.
+- Consultar libros.
 - Editar libros.
 - Eliminar libros.
 - Buscar libros.
@@ -106,13 +113,15 @@ prueba-tecnica/
 ## Gestión de Ejemplares
 
 - Registrar ejemplares por libro.
-- Consulta automática de disponibilidad.
-- Asociación entre libro y ejemplares.
+- Consulta automática de ejemplares disponibles por ISBN.
+- Asociación entre libros y ejemplares.
 
 ## Gestión de Préstamos
 
 - Registrar préstamos.
 - Registrar devoluciones.
+- Consultar préstamos por usuario.
+- Consultar préstamos por libro.
 - Eliminar préstamos.
 - Búsqueda.
 - Paginación.
@@ -121,11 +130,32 @@ prueba-tecnica/
 
 # Validaciones de negocio
 
+- Un usuario no puede tener más de un préstamo activo simultáneamente.
 - No es posible prestar un ejemplar que ya se encuentra prestado.
 - Un ejemplar devuelto vuelve a estar disponible automáticamente.
-- El Dashboard se actualiza después de cada operación.
+- El estado del préstamo se determina automáticamente (Programado, Activo, Vencido y Devuelto).
 - Validación de fechas de préstamo y devolución.
 - Validación de campos obligatorios.
+- Actualización automática del Dashboard después de cada operación.
+
+---
+
+# Datos de prueba
+
+El proyecto incluye un respaldo de la base de datos PostgreSQL ubicado en:
+
+```
+library-backend/database/library_db.dump
+```
+
+El respaldo contiene datos de prueba para facilitar la validación de la aplicación, incluyendo:
+
+- Usuarios registrados.
+- Libros.
+- Ejemplares.
+- Préstamos activos y devueltos.
+
+Esto permite ejecutar y validar la aplicación sin necesidad de crear información manualmente.
 
 ---
 
@@ -134,13 +164,13 @@ prueba-tecnica/
 ## Clonar el repositorio
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone https://github.com/CamiloNavarro1/library-management-system.git
 ```
 
 Ingresar al proyecto
 
 ```bash
-cd prueba-tecnica
+cd library-management-system
 ```
 
 Construir e iniciar todos los servicios
@@ -149,7 +179,7 @@ Construir e iniciar todos los servicios
 docker compose up --build -d
 ```
 
-Verificar el estado
+Verificar el estado de los contenedores
 
 ```bash
 docker compose ps
@@ -160,6 +190,22 @@ Detener los servicios
 ```bash
 docker compose down
 ```
+
+---
+
+# Variables de entorno
+
+El backend utiliza las siguientes variables de entorno:
+
+| Variable | Descripción |
+|----------|-------------|
+| DB_URI | URL de conexión a PostgreSQL |
+| DB_USER | Usuario de la base de datos |
+| DB_PASSWORD | Contraseña de la base de datos |
+| DB_DRIVER | Driver JDBC de PostgreSQL |
+| SERVER_PORT | Puerto del backend |
+| JPA_DDL_AUTO | Estrategia de creación de tablas |
+| SHOW_SQL | Mostrar consultas SQL |
 
 ---
 
@@ -180,7 +226,7 @@ http://localhost:8080
 Swagger
 
 ```
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/swagger-ui.html
 ```
 
 ---
@@ -190,53 +236,40 @@ http://localhost:8080/swagger-ui/index.html
 ## Usuarios
 
 ```
-GET    /api/usuarios
-POST   /api/usuarios
-PUT    /api/usuarios/{id}
-DELETE /api/usuarios/{id}
+GET     /api/usuarios
+GET     /api/usuarios/{id}
+POST    /api/usuarios
+PUT     /api/usuarios/{id}
+DELETE  /api/usuarios/{id}
 ```
 
 ## Libros
 
 ```
-GET    /api/libros
-POST   /api/libros
-PUT    /api/libros/{id}
-DELETE /api/libros/{id}
+GET     /api/libros
+GET     /api/libros/{id}
+POST    /api/libros
+PUT     /api/libros/{id}
+DELETE  /api/libros/{id}
 ```
 
 ## Ejemplares
 
 ```
-POST   /api/libros/{id}/ejemplares
-GET    /api/libros/isbn/{isbn}/ejemplares-disponibles
+POST    /api/libros/{id}/ejemplares
+GET     /api/libros/isbn/{isbn}/ejemplares-disponibles
 ```
 
 ## Préstamos
 
 ```
 GET     /api/prestamos
+GET     /api/prestamos/usuario/{usuarioId}
+GET     /api/prestamos/libro/{libroId}
 POST    /api/prestamos
 PATCH   /api/prestamos/{id}/devolver
 DELETE  /api/prestamos/{id}
 ```
-
----
-
-# Capturas de pantalla
-
-Las capturas del funcionamiento de la aplicación pueden encontrarse en la carpeta:
-
-```
-docs/
-```
-
-Se recomienda incluir imágenes de:
-
-- Dashboard
-- Usuarios
-- Libros
-- Préstamos
 
 ---
 
@@ -247,22 +280,24 @@ Durante el desarrollo se implementaron las siguientes decisiones técnicas:
 - Arquitectura cliente-servidor desacoplada.
 - Comunicación mediante API REST.
 - Componentes reutilizables en React.
-- Consumo centralizado mediante Axios.
-- Persistencia utilizando Spring Data JPA.
+- Consumo centralizado de la API mediante Axios.
+- Persistencia con Spring Data JPA.
 - Dockerización completa del proyecto.
-- Proxy inverso mediante Nginx para evitar problemas de CORS.
-- Organización del código por módulos para facilitar el mantenimiento.
+- Proxy inverso mediante Nginx.
+- Configuración CORS para desarrollo local y ejecución mediante Docker.
+- Organización del código por módulos para facilitar el mantenimiento y la escalabilidad.
 
 ---
 
 # Posibles mejoras
 
 - Implementación de autenticación mediante JWT.
-- Manejo de roles y permisos.
+- Gestión de roles y permisos.
 - Reportes y estadísticas avanzadas.
 - Notificaciones de préstamos vencidos.
-- Pruebas unitarias y de integración.
-- Pipeline de integración y despliegue continuo (CI/CD).
+- Pruebas unitarias.
+- Pruebas de integración.
+- Pipeline de Integración y Despliegue Continuo (CI/CD).
 
 ---
 
@@ -270,4 +305,6 @@ Durante el desarrollo se implementaron las siguientes decisiones técnicas:
 
 **Camilo Andres Navarro Ortiz**
 
-Proyecto desarrollado como prueba técnica para demostrar conocimientos en desarrollo Full Stack utilizando Java, Spring Boot, React, PostgreSQL y Docker.
+Desarrollador Full Stack con experiencia en Java, Spring Boot, React, PostgreSQL y Docker.
+
+Este proyecto fue desarrollado como solución a una prueba técnica para demostrar conocimientos en desarrollo Full Stack, diseño de APIs REST, aplicaciones web modernas y despliegue mediante Docker.
