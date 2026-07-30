@@ -28,7 +28,7 @@ services:
 
   backend:
     build:
-      context: ./library-backend/library-backend
+      context: ./library-backend
       dockerfile: Dockerfile
 
     container_name: library-backend
