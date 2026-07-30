@@ -58,6 +58,7 @@ library-management-system/
 │
 ├── README.md
 ├── docker-compose.yml
+├── .env.example
 ├── .gitignore
 │
 ├── library-backend/
@@ -153,7 +154,7 @@ El respaldo contiene datos de prueba para facilitar la validación de la aplicac
 - Usuarios registrados.
 - Libros.
 - Ejemplares.
-- Préstamos activos y devueltos.
+- Préstamos en diferentes estados (activos y devueltos).
 
 Esto permite ejecutar y validar la aplicación sin necesidad de crear información manualmente.
 
@@ -173,19 +174,43 @@ Ingresar al proyecto
 cd library-management-system
 ```
 
-Construir e iniciar todos los servicios
+## Configurar variables de entorno
+
+Antes de iniciar la aplicación, crea un archivo `.env` en la raíz del proyecto utilizando el archivo de ejemplo incluido.
+
+### Windows (PowerShell)
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### Linux / macOS
+
+```bash
+cp .env.example .env
+```
+
+El archivo `.env` contiene la configuración del entorno, como:
+
+- Credenciales de PostgreSQL.
+- Puertos de la aplicación.
+- Configuración de JPA.
+
+Puedes modificar estos valores según tus necesidades antes de iniciar los contenedores.
+
+## Construir e iniciar todos los servicios
 
 ```bash
 docker compose up --build -d
 ```
 
-Verificar el estado de los contenedores
+## Verificar el estado de los contenedores
 
 ```bash
 docker compose ps
 ```
 
-Detener los servicios
+## Detener los servicios
 
 ```bash
 docker compose down
@@ -195,15 +220,21 @@ docker compose down
 
 # Variables de entorno
 
-El backend utiliza las siguientes variables de entorno:
+La configuración del proyecto se realiza mediante variables de entorno definidas en el archivo `.env`.
+
+Se proporciona un archivo `.env.example` como referencia con la estructura necesaria para ejecutar la aplicación.
+
+Las principales variables utilizadas son:
 
 | Variable | Descripción |
 |----------|-------------|
-| DB_URI | URL de conexión a PostgreSQL |
-| DB_USER | Usuario de la base de datos |
-| DB_PASSWORD | Contraseña de la base de datos |
+| DB_NAME | Nombre de la base de datos PostgreSQL |
+| DB_USER | Usuario de PostgreSQL |
+| DB_PASSWORD | Contraseña de PostgreSQL |
+| DB_PORT | Puerto de PostgreSQL |
 | DB_DRIVER | Driver JDBC de PostgreSQL |
-| SERVER_PORT | Puerto del backend |
+| BACKEND_PORT | Puerto del backend Spring Boot |
+| FRONTEND_PORT | Puerto publicado para el frontend |
 | JPA_DDL_AUTO | Estrategia de creación de tablas |
 | SHOW_SQL | Mostrar consultas SQL |
 
@@ -283,6 +314,7 @@ Durante el desarrollo se implementaron las siguientes decisiones técnicas:
 - Consumo centralizado de la API mediante Axios.
 - Persistencia con Spring Data JPA.
 - Dockerización completa del proyecto.
+- Configuración mediante variables de entorno (`.env`).
 - Proxy inverso mediante Nginx.
 - Configuración CORS para desarrollo local y ejecución mediante Docker.
 - Organización del código por módulos para facilitar el mantenimiento y la escalabilidad.
