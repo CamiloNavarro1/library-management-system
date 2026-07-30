@@ -268,6 +268,6 @@ Durante el desarrollo se implementaron las siguientes decisiones técnicas:
 
 # Autor
 
-**Camilo Navarro Navarro Ortiz**
+**Camilo Andres Navarro Ortiz**
 
 Proyecto desarrollado como prueba técnica para demostrar conocimientos en desarrollo Full Stack utilizando Java, Spring Boot, React, PostgreSQL y Docker.
